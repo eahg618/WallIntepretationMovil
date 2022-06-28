@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">WallIntepretationMovil</string>
+    <string name="action_settings">Configuracion</string>
+    <string name="hello_world">Hola Mundo</string>
+    <string name="none_paired">Ningun dispositivo pudo ser emparejado</string>
+    <string name="button_connect">Connect</string>
+    <string name="button_disconnect">Disconnect</string>
+    <string name="title_devices">Devices</string>
+    <string name="scan">Scan</string>
+    <string name="stopScan">Stop Scanning</string>
+</resources>
