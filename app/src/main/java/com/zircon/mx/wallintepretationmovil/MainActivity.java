@@ -3,7 +3,9 @@ package com.zircon.mx.wallintepretationmovil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,9 +33,12 @@ import android.util.Pair;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 
 public class MainActivity extends Activity implements SensorEventListener {
@@ -42,7 +47,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     TextView txtArduino, txtDevicePosition, txtResponseFromDevice, sensorView0, sensorView1, sensorView2, sensorView3;
     TextView txtSendorLDR;
     Handler bluetoothIn;
-
+    ImageView signalON, signalOFF;
     final int handlerState = 0;                         //used to identify handler message
     private BluetoothAdapter btAdapter = null;
     private BluetoothSocket btSocket = null;
@@ -52,6 +57,8 @@ public class MainActivity extends Activity implements SensorEventListener {
     private AreaDibujo areaDibujo;
     private List<Pair<Integer, Integer>> movimientos;
     private int posX;
+    private int posXF;
+    private int posYF;
     private int posY;
     private boolean movimientoUp;
     private boolean movimientoDown;
@@ -61,10 +68,22 @@ public class MainActivity extends Activity implements SensorEventListener {
     private Timer timer;
     private TimerTask task;
 
+    //To know center and edge. if go to teh center or come from the center
+    private int X = 0;
+    private int Base = 126;
+    private boolean edge = false;
+    private int Z = 126;
+    private boolean ToTheTOP = false;
+    private boolean ToTheBase = false;
+    private boolean Stopped = false;
+    private boolean CenterReached = false;
+    private boolean CenterAquired = false;
+    private boolean LeftEdge = false;
+    private boolean RightEdge = false;
+
 
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
     // String for MAC address
     private static String address = null;
     private SensorManager sensorManager;
@@ -75,9 +94,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         areaDibujo = (AreaDibujo) findViewById(R.id.Lienzo);
+
         movimientos = new ArrayList<>();
-        posX = 10;
-        posY = 700;
+        posX = 0;
+        posY = 1200;
         movimientoUp = false;
         movimientoDown = false;
         movimientoLeft = false;
@@ -89,26 +109,30 @@ public class MainActivity extends Activity implements SensorEventListener {
         this.btnOn = (Button) findViewById(R.id.buttonOn);
         this.txtDevicePosition = (TextView) findViewById(R.id.txtString);
         this.txtResponseFromDevice = (TextView) findViewById(R.id.ResponseFromDevice);
-        txtSendorLDR = (TextView) findViewById(R.id.tv_sendorldr);
+        this.signalON = (ImageView) findViewById(R.id.imageView4);
+        this.signalON.setVisibility(View.INVISIBLE);
+        this.signalOFF = (ImageView) findViewById(R.id.imageView3);
 
 
         //handler para recivir la informacion en el activity y desplegarla
         bluetoothIn = new Handler() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             public void handleMessage(Message msg) {
                 if (msg.what == handlerState) {
                     Integer readMessage = (Integer) msg.obj;        //mensaje enviado despues de tratar la informacion del buffer
-                    if (readMessage > 126) {
-
-                        posY=400;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            areaDibujo.ColocarPunto(posX, posY);
-                        }
-                    } else {
-                        posY = 700;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            areaDibujo.ColocarPunto(posX, posY);
-                        }
+                    if (LeftEdge) {
+                        areaDibujo.posiciones.clear();
+                        areaDibujo.PutSignal(100, 100, 100, 1000);
                     }
+                    if (RightEdge) {
+                        areaDibujo.posiciones.clear();
+                        areaDibujo.PutSignal(800, 800, 800, 1000);
+                    }
+                    if (CenterAquired) {
+                        areaDibujo.posiciones.clear();
+                        areaDibujo.PutSignal(400, 400, 400, 1000);
+                    }
+
                     //txtResponseFromDevice.setText(readMessage);
 
                 }
@@ -123,13 +147,23 @@ public class MainActivity extends Activity implements SensorEventListener {
             public void onClick(View v) {
                 // mConnectedThread.write("BATV00000000AD");    // envia comando via Bluetooth
                 // mConnectedThread.write("AMPL00000000AA");
+                if (signalON.getVisibility() == View.INVISIBLE)
+                    signalON.setVisibility(View.VISIBLE);
+                else
+                    signalON.setVisibility(View.INVISIBLE);
             }
         });
 
-          task = new TimerTask() {
+        task = new TimerTask() {
             @Override
             public void run() {
                 mConnectedThread.write("AMPL00000000AA");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mConnectedThread.write("FLAG000000009A");
             }
         };
 
@@ -153,8 +187,6 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     @SuppressLint("MissingPermission")
     private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-
-
         return device.createRfcommSocketToServiceRecord(BTMODULEUUID);
         //creates secure outgoing connecetion with BT device using UUID
     }
@@ -197,7 +229,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
         mConnectedThread = new ConnectedThread(btSocket);
         mConnectedThread.start();
-       timer.schedule(task, 10, 200); //start timer, request AMPL
+        timer.schedule(task, 10, 350); //start timer, request AMPL
         //I send a character when resuming.beginning transmission to check device is connected
         //If it is not an exception will be thrown in the write method and finish() will be called
         mConnectedThread.write("x");
@@ -243,7 +275,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         movimientos.add(new Pair(Math.round(sensorEvent.values[0]), Math.round(sensorEvent.values[1])));
-        // Log.d("Posiciones", "X:" + Math.round(sensorEvent.values[0]) + " Y:" + Math.round(sensorEvent.values[1]));
+
+
+        //Log.d("Posiciones", "X:" + Math.round(sensorEvent.values[0]) + " Y:" + Math.round(sensorEvent.values[1]));
         //MOVIMIENTOS PARA LA X
       /*  if (Math.round(sensorEvent.values[0]) > 0 && movimientoLeft == false)//movimiento a la derecha
         {
@@ -285,9 +319,11 @@ public class MainActivity extends Activity implements SensorEventListener {
             posX = 0;
             posY = 700;
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            areaDibujo.ColocarPunto((posX = posX + 1), posY);
-        }
+        if (ToTheTOP)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                areaDibujo.ColocarPunto((posX = posX + 1), posY);
+            }
+
         this.txtDevicePosition.setText("X:" + Math.round(sensorEvent.values[0]) + " Y:" + Math.round(sensorEvent.values[1]) + " Z:" + Math.round(sensorEvent.values[2]));
     }
 
@@ -333,7 +369,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                     }
 
                     String readMessage = new String(buffer, 0, bytes);
-                    Log.d("Mensajes", readMessage);
+                    //Log.d("Mensajes", readMessage);
 
                     //convertir el valor a decimal
                     String convertedStringToHEX = "";
@@ -344,16 +380,87 @@ public class MainActivity extends Activity implements SensorEventListener {
                         i = i + 1;
                     }
                     String realMessage = this.hexToAscii(convertedStringToHEX);
-                    int messageDecimalAmplitud=0;
+                    Log.d("Mensajes", realMessage);
+
+
+                    int messageDecimalAmplitud = 0;
                     if (realMessage.contains("CHK") == false) {
-                        messageDecimalAmplitud= Integer.parseInt(realMessage.substring(4), 16);
+                        messageDecimalAmplitud = Integer.parseInt(realMessage.substring(4), 16);
+
+                        this.EvaluateFlag(messageDecimalAmplitud);
+
                         Log.d("Mensajes", String.valueOf(messageDecimalAmplitud));
                     }
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, messageDecimalAmplitud).sendToTarget();// Send the obtained bytes to the UI Activity via handler
 
                 } catch (Exception e) {
-                    break;
+                    Stopped = true;
                 }
+            }
+        }
+
+        private void EvaluateFlag(int messageDecimalAmplitud) {
+
+
+            switch (messageDecimalAmplitud) {
+                case 1149: //Center
+                    CenterAquired = true;
+                    break;
+                case 635: //Left edge
+                    LeftEdge = true;
+                    break;
+                case 378://Right Edge
+                    RightEdge = true;
+                    break;
+                case 121://Nothing
+                    CenterAquired = false;
+                    LeftEdge = false;
+                    RightEdge = false;
+                    break;
+            }
+        }
+
+        //DEPRECATED: CHANGE THE COMMAND TO THE UNIT FROM AMPL TO UNIT
+        private void EvaluateX(int messageDecimalAmplitud) {
+            X = messageDecimalAmplitud;
+
+            int result = X - Z;
+            try {
+                if (result > 0)// up to the center
+                {
+                    Log.d("Logica", "Rumbo al Centro");
+                    if (Z == 126 && X > Z) {
+                        Log.d("Logica", "Edge");
+                        edge = true;
+                    }
+                    Z = X;
+                    ToTheTOP = true;
+                    ToTheBase = false;
+
+                } else if (result < 0)//coming from the center
+                {
+                    if (CenterReached == false) {
+                        CenterAquired = true;
+                        CenterReached = true;
+                    }
+                    Log.d("Logica", "Rumbo a  la base");
+                    if (X == 126 && Z > X) {
+                        Log.d("Logica", "edge encontrada");
+                        edge = true;
+                    }
+                    ToTheBase = true;
+                    ToTheTOP = false;
+
+                } else if (result == 0) {
+                    Log.d("Logica", "Sin Cambio");
+                    ToTheBase = false;
+                    ToTheTOP = false;
+                    edge = false;
+                    //Stopped = true;
+                }
+            } catch (Exception ex) {
+
+
             }
         }
 

@@ -4,8 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/drawable/corners.xml" value="0.1105" />
+        <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/drawable/ic_launcher_background.xml" value="0.198" />
         <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/activity_list.xml" value="0.25416666666666665" />
-        <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/activity_main.xml" value="0.22826086956521738" />
+        <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/activity_main.xml" value="0.264" />
         <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/device_grid_item.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/device_list.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/ehernandez/AndroidStudioProjects/WallIntepretationMovil/app/src/main/res/layout/device_list_item.xml" value="0.10885416666666667" />
