@@ -15,23 +15,9 @@
         android:layout_marginLeft="0dp"
         android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/imageView5"
-            android:layout_width="match_parent"
-            android:layout_height="103dp"
-            android:src="@drawable/logozircon" />
-
-        <View
-            android:id="@+id/divider2"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?android:attr/listDivider" />
-
-
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-
 
             <ImageView
                 android:id="@+id/imageView3"
@@ -46,55 +32,101 @@
                 android:src="@drawable/signalon" />
 
 
-
         </RelativeLayout>
+
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/TextSignal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Scanning..."
             android:textAlignment="center" />
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+
+
+
+        <com.zircon.mx.wallintepretationmovil.AreaDibujo
+            android:id="@+id/Lienzo"
+            android:layout_width="match_parent"
+            android:layout_height="300dp" />
         <View
             android:id="@+id/divider3"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
 
-        <Button
-            android:id="@+id/buttonOn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:text="Send" />
-
-        <TextView
-            android:id="@+id/txtString"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/testView1"
-            android:layout_alignParentBottom="true"
-            android:text="Datos recibidos ="
-            android:textSize="15sp" />
-
-        <TextView
-            android:id="@+id/ResponseFromDevice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Response from Device"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textStyle="bold" />
-
-        <com.zircon.mx.wallintepretationmovil.AreaDibujo
-            android:id="@+id/Lienzo"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="400dp" />
+            android:layout_height="20dp">
 
+            <TextView
+                android:id="@+id/Distance"
+                android:layout_width="103dp"
+                android:layout_height="wrap_content"
+                android:text="inch:"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/Distance2"
+                android:layout_width="103dp"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/Distance3"
+                android:layout_width="103dp"
+                android:layout_height="wrap_content"
+                android:text="inch:"
+                android:textAlignment="center" />
+        </LinearLayout>
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="?android:attr/listDivider" />
+        <com.zircon.mx.wallintepretationmovil.AreaDibujo
+            android:id="@+id/Lienzo2"
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+        <View
+            android:id="@+id/divider4"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider" />
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/logozircon" />
+        <!-- <Button
+             android:id="@+id/buttonOn"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentLeft="true"
+             android:layout_alignParentTop="true"
+             android:text="Send" />
+
+         <TextView
+             android:id="@+id/txtString"
+             android:layout_width="fill_parent"
+             android:layout_height="wrap_content"
+             android:layout_alignLeft="@+id/testView1"
+             android:layout_alignParentBottom="true"
+             android:text="Datos recibidos ="
+             android:textSize="15sp" />
+
+         <TextView
+             android:id="@+id/ResponseFromDevice"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:text="Response from Device"
+             android:textAppearance="?android:attr/textAppearanceSmall"
+             android:textStyle="bold" />-->
 
 
     </LinearLayout>
