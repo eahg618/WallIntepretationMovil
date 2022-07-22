@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     Button btnOn, btnOff;
     TextView txtArduino, txtDevicePosition, txtResponseFromDevice, sensorView0, sensorView1, sensorView2, sensorView3;
-    TextView TextSignal,inchLeftToCenter,inchRighToCenter;
+    TextView TextSignal, inchLeftToCenter, inchRighToCenter;
     Handler bluetoothIn;
     ImageView signalON, signalOFF;
     final int handlerState = 0;                         //used to identify handler message
@@ -89,8 +89,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-    // String for MAC address
-    private static String address = null;
+
+    private static String address = null; // String for MAC address
     private SensorManager sensorManager;
     private Sensor sensorAccelerometer;
 
@@ -100,12 +100,19 @@ public class MainActivity extends Activity implements SensorEventListener {
         setContentView(R.layout.activity_main);
         areaDibujo = (AreaDibujo) findViewById(R.id.Lienzo);
         areaDibujo2 = (AreaDibujo) findViewById(R.id.Lienzo2);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null)
+        {
+            address = extras.getString("Address");
 
+
+
+        }
         movimientos = new ArrayList<>();
         posX = 0;
         posY = 150;
         sumPX = 0;
-        inchLeftToCenter= (TextView) findViewById(R.id.Distance);
+        inchLeftToCenter = (TextView) findViewById(R.id.Distance);
         inchRighToCenter = (TextView) findViewById(R.id.Distance3);
         movimientoUp = false;
         movimientoDown = false;
@@ -138,12 +145,12 @@ public class MainActivity extends Activity implements SensorEventListener {
                         //areaDibujo.posiciones.clear();
                         areaDibujo.PutSignal(100, 30, 100, 800);
                         TextSignal.setText("Left Edge");
-                        inchLeftToCenter.setText(String.valueOf(sumPX*0.01042));
+                        inchLeftToCenter.setText(String.valueOf(sumPX * 0.01042));
                         signalON.setVisibility(View.VISIBLE);
                     } else if (RightEdge) {
                         //areaDibujo.posiciones.clear();
                         areaDibujo.PutSignal(900, 30, 900, 800);
-                        inchRighToCenter.setText(String.valueOf(sumPX*0.01042));
+                        inchRighToCenter.setText(String.valueOf(sumPX * 0.01042));
                         TextSignal.setText("Right Edge");
                         signalON.setVisibility(View.VISIBLE);
                     } else if (CenterAquired) {
@@ -241,11 +248,13 @@ public class MainActivity extends Activity implements SensorEventListener {
         Intent intent = getIntent();
 
         //Get the MAC address from the DeviceListActivty via EXTRA
-        address = intent.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS.toString());
+        //address = intent.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS.toString()); //DEPRECATED, NOW WE TAKE THE MAC FROM THE LISTED SCANED DEVICES
+
 
         //create device and set the MAC address
         //Log.i("ramiro", "adress : " + address);
-        BluetoothDevice device = btAdapter.getRemoteDevice(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        //BluetoothDevice device = btAdapter.getRemoteDevice(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        BluetoothDevice device = btAdapter.getRemoteDevice(address);
 
         try {
             btSocket = createBluetoothSocket(device);
@@ -470,7 +479,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 if (result > 0)// up to the center
                 {
                     if (Z == 126 && X > Z) {
-                        sumPX=0;
+                        sumPX = 0;
                         //Log.d("Logica", "Edge");
                         // edge = true;
                         CleanGraph = true;
@@ -499,7 +508,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                         Log.d("Logica", "Rumbo a  la base");
                         ToTheBase = true;
                         ToTheTOP = false;
-                        sumPX=sumPX+1;
+                        sumPX = sumPX + 1;
                     }
                 } else if (result == 0) {
                     Log.d("Logica", "Sin Cambio");

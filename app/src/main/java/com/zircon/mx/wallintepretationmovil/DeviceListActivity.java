@@ -33,7 +33,7 @@ public class DeviceListActivity extends Activity {
     TextView textView1;
 
     // EXTRA string to send on to mainactivity
-    public static String EXTRA_DEVICE_ADDRESS = "34:81:F4:1A:49:06".toString();
+    public static String EXTRA_DEVICE_ADDRESS = "";
 
     // Member fields
     private BluetoothAdapter mBtAdapter;
